@@ -25,7 +25,7 @@ document.getElementById("cursoForm").addEventListener("submit", function(event) 
 
 // Función para enviar los datos al backend en Python (Flask)
 function enviarDatos() {
-    fetch("http://127.0.0.1:5000/procesar", { // Se envía una solicitud a la API local en Flask
+    fetch("https://unihorario.onrender.com", { // Se envía una solicitud a la API local en Flask
         method: "POST", // Se usa el método POST para enviar datos
         headers: { "Content-Type": "application/json" }, // Se especifica el tipo de contenido JSON
         body: JSON.stringify({ cursos }) // Se convierten los cursos a formato JSON para enviarlos
