@@ -1,41 +1,55 @@
+// Se declara un array vacío para almacenar los cursos ingresados por el usuario
+let cursos = [];
+
+// Se asegura de que el script se ejecute solo cuando el DOM esté completamente cargado
 document.addEventListener("DOMContentLoaded", function () {
-    let cursos = [];
+    // Se obtiene el formulario y se le añade un evento para manejar el envío de datos
+    document.getElementById("cursoForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Evita que la página se recargue al enviar el formulario
 
-    document.getElementById("cursoForm").addEventListener("submit", function(event) {
-        event.preventDefault();
+        // Se obtienen los valores ingresados en el formulario
+        let nombre = document.getElementById("nombreCurso").value.trim(); // Nombre del curso
+        let seccion = document.getElementById("seccion").value.trim(); // Número de sección
 
-        let nombre = document.getElementById("nombreCurso").value;
-        let seccion = document.getElementById("seccion").value;
-        let dias = document.getElementById("dias").value.split(",").map(d => d.trim());
+        // Se obtiene la lista de días, separándolos por comas y eliminando espacios en blanco
+        let dias = document.getElementById("dias").value.split(",").map(d => d.trim().toUpperCase());
+
+        // Se obtiene la lista de horarios, convirtiéndolos en arrays de números (hora inicio - hora fin)
         let horas = document.getElementById("horas").value.split(",").map(h => h.split("-").map(Number));
 
+        // Se agrega el curso al array `cursos`
         cursos.push({ nombre, seccion, dias, horas });
 
+        // Se actualiza la lista en la interfaz para mostrar el curso agregado
         let lista = document.getElementById("listaCursos");
-        lista.innerHTML += `<li>${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}</li>`;
+        let nuevoCurso = document.createElement("li");
+        nuevoCurso.textContent = `${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`;
+        lista.appendChild(nuevoCurso);
+
+        // Se limpian los campos del formulario después de agregar el curso
+        document.getElementById("cursoForm").reset();
     });
 
-    function enviarDatos() {
-        fetch("https://unihorario.onrender.com/procesar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            mode: "cors", // Permite solicitudes CORS
-            body: JSON.stringify({ cursos })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById("resultado").innerText = JSON.stringify(data, null, 2);
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            document.getElementById("resultado").innerText = "Error al obtener combinaciones. Ver consola.";
-        });
-    }
-
-    document.getElementById("generar").addEventListener("click", enviarDatos);
+    // Se obtiene el botón de generar combinaciones y se le añade un evento de clic
+    document.getElementById("generarBtn").addEventListener("click", enviarDatos);
 });
+
+// Función para enviar los datos al backend en Flask
+function enviarDatos() {
+    fetch("https://unihorario.onrender.com/procesar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cursos }) // Se convierten los cursos a formato JSON para enviarlos
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Se muestra el resultado en la interfaz
+        document.getElementById("resultado").innerText = JSON.stringify(data, null, 2);
+    })
+    .catch(error => console.error("Error:", error)); // Se captura cualquier error en la solicitud
+}
