@@ -48,8 +48,22 @@ function enviarDatos() {
         return response.json();
     })
     .then(data => {
-        // Se muestra el resultado en la interfaz
-        document.getElementById("resultado").innerText = JSON.stringify(data, null, 2);
+        // Se obtiene el contenedor donde se mostrarán los resultados
+        let resultadoDiv = document.getElementById("resultado");
+        resultadoDiv.innerHTML = ""; // Se limpia el contenido previo
+
+        // Se recorre cada combinación generada y se muestra en el formato solicitado
+        data.forEach((combinacion, index) => {
+            let combinacionTexto = document.createElement("div");
+            combinacionTexto.innerHTML = `<strong>Combinación ${index + 1}:</strong><br>`;
+
+            combinacion.forEach(curso => {
+                combinacionTexto.innerHTML += `${curso.curso} - ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}<br>`;
+            });
+
+            combinacionTexto.innerHTML += "<br>"; // Espaciado entre combinaciones
+            resultadoDiv.appendChild(combinacionTexto);
+        });
     })
     .catch(error => console.error("Error:", error)); // Se captura cualquier error en la solicitud
 }
