@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from itertools import combinations, product
 
 app = Flask(__name__)
+CORS(app)  # Permite solicitudes desde cualquier dominio
 
 def horarios_conflictos(horario1, horario2):
     dias_comunes = set(horario1['dias']).intersection(horario2['dias'])
@@ -18,6 +20,10 @@ def verificar_combinacion(combinacion):
             if i < j and horarios_conflictos(curso1, curso2):
                 return False
     return True
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"mensaje": "API de UniHorario funcionando correctamente"}), 200
 
 @app.route("/procesar", methods=["POST"])
 def procesar():
