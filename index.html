@@ -1,11 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Combinador de horarios | UM</title>
+
 </head>
 <body>
+    <script src="./src/js/index.js"></script>
     
+    <h2>Ingrese los cursos</h2>
+    <form id="cursoForm">
+        <label>Nombre del curso:</label>
+        <input type="text" id="nombreCurso" required>
+        <label>Sección:</label>
+        <input type="text" id="seccion" required>
+        <label>Días:</label>
+        <input type="text" id="dias" placeholder="Ej: LUNES, MIÉRCOLES" required>
+        <label>Horario (inicio-fin):</label>
+        <input type="text" id="horas" placeholder="Ej: 9-12.75" required>
+        <button type="submit">Agregar Curso</button>
+    </form>
+
+    <h3>Cursos ingresados:</h3>
+    <ul id="listaCursos"></ul>
+
+    <button onclick="enviarDatos()">Generar Combinaciones</button>
+
+    <h3>Resultados:</h3>
+    <pre id="resultado"></pre>
 </body>
 </html>
