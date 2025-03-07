@@ -1,4 +1,4 @@
-# 
+# UniHorario
 
 🌐 **Accede a  aquí:** [ - Centro de Estudiantes CC UNMSM](https://centro-de-estudiantes-cc-unmsm.github.io/UniHorario/)
 
