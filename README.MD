@@ -1,6 +1,6 @@
 # 
 
-🌐 **Accede a  aquí:** [ - Centro de Estudiantes CC UNMSM](https://centro-de-estudiantes-cc-unmsm.github.io//)
+🌐 **Accede a  aquí:** [ - Centro de Estudiantes CC UNMSM](https://centro-de-estudiantes-cc-unmsm.github.io/UniHorario/)
 
 
 **** es una herramienta web que permite a los estudiantes gestionar sus horarios de cursos sin conflictos. Permite ingresar cursos, secciones, días y horas para generar combinaciones válidas y optimizar la planificación académica.
