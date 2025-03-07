@@ -63,7 +63,7 @@ Simplemente abre `index.html` en un navegador.
 
 ## 📜 Licencia
 
-Este proyecto está licenciado bajo la **MIT License**. Consulta el archivo `LICENSE` para más detalles.
+Este proyecto está licenciado bajo la **AGPL-3.0**. Consulta el archivo `LICENSE` para más detalles.
 
 ## 🤝 Contribuciones
 
