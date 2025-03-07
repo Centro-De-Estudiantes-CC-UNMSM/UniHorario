@@ -7,7 +7,17 @@
 
 </head>
 <body>
-    
+    <footer style="background-color: black; color: white;">Desarrollo libre hecho por el CECC <!--@dr.gonas--></footer>
+    <section>
+        <h3>Manual de uso</h3>
+        <p>
+            <ul>
+                <li>Para cada sección de un curso debe tener exactamente el mismo nombre.</li>
+                <li>Las horas deben escribirse en formato decimal: 9:30 como 9.50 y 9:45 como 9.75.</li>
+                <li>Si un curso en una sección tiene múltiples horarios, se deben separar los días con comas (ej. lunes, martes) y las horas correspondientes también con comas (ej. 9-12.50, 10-11).</li>
+            </ul>
+        </p>
+    </section>
     <h2>Ingrese los cursos</h2>
     <form id="cursoForm">
         <label>Nombre del curso:</label>
@@ -23,18 +33,12 @@
 
     <h3>Cursos ingresados:</h3>
     <ul id="listaCursos"></ul>
-
-    <!--<button onclick="enviarDatos()">Generar Combinaciones</button>
-
-    <h3>Resultados:</h3>
-    <pre id="resultado"></pre>-->
     
     <button id="generarBtn">Generar Combinaciones</button>
 
     <h3>Resultados:</h3>
     <pre id="resultado"></pre>
 
-    
     <script src="./src/js/index.js"></script>
 </body>
 </html>
