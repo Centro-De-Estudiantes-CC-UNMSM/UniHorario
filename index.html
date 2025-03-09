@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Combinador de horarios | UM</title>
-
 </head>
 <body>
     <footer style="background-color: black; color: white;">Desarrollo libre hecho por el CECC <!--@dr.gonas--></footer>
@@ -31,6 +30,17 @@
         <button type="submit">Agregar Curso</button>
     </form>
 
+    <!-- Casillas para seleccionar ciclos -->
+    <div>
+        <label>
+            <input type="checkbox" id="ciclo3"> Tercer Ciclo
+        </label>
+        <label>
+            <input type="checkbox" id="ciclo5"> Quinto Ciclo
+        </label>
+        <button id="cargarCursosBtn">Cargar Cursos</button>
+    </div>
+
     <h3>Cursos ingresados:</h3>
     <ul id="listaCursos"></ul>
     
@@ -39,6 +49,7 @@
     <h3>Resultados:</h3>
     <pre id="resultado"></pre>
 
+    <!-- Asegúrate de que el script esté al final del body -->
     <script src="./src/js/index.js"></script>
 </body>
 </html>

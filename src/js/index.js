@@ -1,45 +1,117 @@
-// Se declara un array vacío para almacenar los cursos ingresados por el usuario
 let cursos = [];
 
-// Se asegura de que el script se ejecute solo cuando el DOM esté completamente cargado
 document.addEventListener("DOMContentLoaded", function () {
-    // Se obtiene el formulario y se le añade un evento para manejar el envío de datos
-    document.getElementById("cursoForm").addEventListener("submit", function (event) {
-        event.preventDefault(); // Evita que la página se recargue al enviar el formulario
+    const cursoForm = document.getElementById("cursoForm");
+    const generarBtn = document.getElementById("generarBtn");
+    const cargarCursosBtn = document.getElementById("cargarCursosBtn");
 
-        // Se obtienen los valores ingresados en el formulario
-        let nombre = document.getElementById("nombreCurso").value.trim(); // Nombre del curso
-        let seccion = document.getElementById("seccion").value.trim(); // Número de sección
+    if (cursoForm && generarBtn && cargarCursosBtn) {
+        // Agregar un curso manualmente
+        cursoForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            agregarCursoManual();
+        });
 
-        // Se obtiene la lista de días, separándolos por comas y eliminando espacios en blanco
-        let dias = document.getElementById("dias").value.split(",").map(d => d.trim().toUpperCase());
+        // Generar combinaciones
+        generarBtn.addEventListener("click", enviarDatos);
 
-        // Se obtiene la lista de horarios, convirtiéndolos en arrays de números (hora inicio - hora fin)
-        let horas = document.getElementById("horas").value.split(",").map(h => h.split("-").map(Number));
+        // Cargar cursos automáticamente desde Firebase
+        cargarCursosBtn.addEventListener("click", function () {
+            const ciclo3 = document.getElementById("ciclo3").checked;
+            const ciclo5 = document.getElementById("ciclo5").checked;
 
-        // Se agrega el curso al array `cursos`
-        cursos.push({ nombre, seccion, dias, horas });
+            if (!ciclo3 && !ciclo5) {
+                alert("Por favor, selecciona al menos un ciclo.");
+                return;
+            }
 
-        // Se actualiza la lista en la interfaz para mostrar el curso agregado
-        let lista = document.getElementById("listaCursos");
-        let nuevoCurso = document.createElement("li");
-        nuevoCurso.textContent = `${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`;
-        lista.appendChild(nuevoCurso);
-
-        // Se limpian los campos del formulario después de agregar el curso
-        document.getElementById("cursoForm").reset();
-    });
-
-    // Se obtiene el botón de generar combinaciones y se le añade un evento de clic
-    document.getElementById("generarBtn").addEventListener("click", enviarDatos);
+            cargarCursosDesdeFirebase(ciclo3, ciclo5);
+        });
+    } else {
+        console.error("No se encontraron los elementos del DOM.");
+    }
 });
 
-// Función para enviar los datos al backend en Flask
+function agregarCursoManual() {
+    let nombre = document.getElementById("nombreCurso").value.trim();
+    let seccion = document.getElementById("seccion").value.trim();
+    let dias = document.getElementById("dias").value.split(",").map(d => d.trim().toUpperCase());
+    let horas = document.getElementById("horas").value.split(",").map(h => h.split("-").map(Number));
+
+    cursos.push({ nombre, seccion, dias, horas });
+
+    let lista = document.getElementById("listaCursos");
+    let nuevoCurso = document.createElement("li");
+    nuevoCurso.textContent = `${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`;
+    lista.appendChild(nuevoCurso);
+
+    document.getElementById("cursoForm").reset();
+}
+
+function cargarCursosDesdeFirebase(ciclo3, ciclo5) {
+    // Limpiar la lista de cursos actual
+    cursos = [];
+    document.getElementById("listaCursos").innerHTML = "";
+
+    // Cargar cursos de tercer ciclo si está seleccionado
+    if (ciclo3) {
+        fetch("https://unihorario-e8c19-default-rtdb.firebaseio.com/tercerCiclo.json")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    data.forEach(curso => {
+                        cursos.push(curso);
+                        agregarCursoALista(curso);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar cursos de tercer ciclo:", error);
+            });
+    }
+
+    // Cargar cursos de quinto ciclo si está seleccionado
+    if (ciclo5) {
+        fetch("https://unihorario-e8c19-default-rtdb.firebaseio.com/quintoCiclo.json")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    data.forEach(curso => {
+                        cursos.push(curso);
+                        agregarCursoALista(curso);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar cursos de quinto ciclo:", error);
+            });
+    }
+
+    alert("Cursos cargados automáticamente desde Firebase.");
+}
+
+function agregarCursoALista(curso) {
+    let lista = document.getElementById("listaCursos");
+    let nuevoCurso = document.createElement("li");
+    nuevoCurso.textContent = `${curso.nombre} - Sección ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`;
+    lista.appendChild(nuevoCurso);
+}
+
 function enviarDatos() {
     fetch("https://unihorario.onrender.com/procesar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cursos }) // Se convierten los cursos a formato JSON para enviarlos
+        body: JSON.stringify({ cursos })
     })
     .then(response => {
         if (!response.ok) {
@@ -48,11 +120,9 @@ function enviarDatos() {
         return response.json();
     })
     .then(data => {
-        // Se obtiene el contenedor donde se mostrarán los resultados
         let resultadoDiv = document.getElementById("resultado");
-        resultadoDiv.innerHTML = ""; // Se limpia el contenido previo
+        resultadoDiv.innerHTML = "";
 
-        // Se recorre cada combinación generada y se muestra en el formato solicitado
         data.forEach((combinacion, index) => {
             let combinacionTexto = document.createElement("div");
             combinacionTexto.innerHTML = `<strong>Combinación ${index + 1}:</strong><br>`;
@@ -61,9 +131,9 @@ function enviarDatos() {
                 combinacionTexto.innerHTML += `${curso.curso} - ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}<br>`;
             });
 
-            combinacionTexto.innerHTML += "<br>"; // Espaciado entre combinaciones
+            combinacionTexto.innerHTML += "<br>";
             resultadoDiv.appendChild(combinacionTexto);
         });
     })
-    .catch(error => console.error("Error:", error)); // Se captura cualquier error en la solicitud
+    .catch(error => console.error("Error:", error));
 }
