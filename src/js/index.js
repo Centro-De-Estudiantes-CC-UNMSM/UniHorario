@@ -42,7 +42,18 @@ function agregarCursoManual() {
 
     let lista = document.getElementById("listaCursos");
     let nuevoCurso = document.createElement("li");
-    nuevoCurso.textContent = `${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`;
+
+    // Agregar una casilla de verificación
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = true; // Por defecto, el curso está marcado
+    checkbox.addEventListener("change", function () {
+        // Actualizar el estado del curso (marcado o no)
+        cursos.find(c => c.nombre === nombre && c.seccion === seccion).marcado = checkbox.checked;
+    });
+
+    nuevoCurso.appendChild(checkbox);
+    nuevoCurso.appendChild(document.createTextNode(` ${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`));
     lista.appendChild(nuevoCurso);
 
     document.getElementById("cursoForm").reset();
@@ -65,6 +76,7 @@ function cargarCursosDesdeFirebase(ciclo3, ciclo5) {
             .then(data => {
                 if (data) {
                     data.forEach(curso => {
+                        curso.marcado = true; // Por defecto, el curso está marcado
                         cursos.push(curso);
                         agregarCursoALista(curso);
                     });
@@ -87,6 +99,7 @@ function cargarCursosDesdeFirebase(ciclo3, ciclo5) {
             .then(data => {
                 if (data) {
                     data.forEach(curso => {
+                        curso.marcado = true; // Por defecto, el curso está marcado
                         cursos.push(curso);
                         agregarCursoALista(curso);
                     });
@@ -103,15 +116,29 @@ function cargarCursosDesdeFirebase(ciclo3, ciclo5) {
 function agregarCursoALista(curso) {
     let lista = document.getElementById("listaCursos");
     let nuevoCurso = document.createElement("li");
-    nuevoCurso.textContent = `${curso.nombre} - Sección ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`;
+
+    // Agregar una casilla de verificación
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = curso.marcado; // Usar el estado del curso
+    checkbox.addEventListener("change", function () {
+        // Actualizar el estado del curso (marcado o no)
+        curso.marcado = checkbox.checked;
+    });
+
+    nuevoCurso.appendChild(checkbox);
+    nuevoCurso.appendChild(document.createTextNode(` ${curso.nombre} - Sección ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`));
     lista.appendChild(nuevoCurso);
 }
 
 function enviarDatos() {
+    // Filtrar solo los cursos marcados
+    const cursosMarcados = cursos.filter(curso => curso.marcado);
+
     fetch("https://unihorario.onrender.com/procesar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cursos })
+        body: JSON.stringify({ cursos: cursosMarcados })
     })
     .then(response => {
         if (!response.ok) {
