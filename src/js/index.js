@@ -1,25 +1,31 @@
-let cursos = [];
+// 1. Inicialización de array para almacenar cursos
+let cursos = []; // Almacena todos los cursos cargados (tanto manuales como automáticos)
 
+// 2. Configuración inicial cuando el DOM está listo
 document.addEventListener("DOMContentLoaded", function () {
+    // Obtener referencias a elementos del formulario
     const cursoForm = document.getElementById("cursoForm");
     const generarBtn = document.getElementById("generarBtn");
     const cargarCursosBtn = document.getElementById("cargarCursosBtn");
 
+    // Verificar que existan todos los elementos necesarios
     if (cursoForm && generarBtn && cargarCursosBtn) {
-        // Agregar un curso manualmente
+        // 3. Manejador para agregar cursos manualmente
         cursoForm.addEventListener("submit", function (event) {
-            event.preventDefault();
+            event.preventDefault(); // Evita el envío tradicional del formulario
             agregarCursoManual();
         });
 
-        // Generar combinaciones
+        // 4. Manejador para generar combinaciones de horarios
         generarBtn.addEventListener("click", enviarDatos);
 
-        // Cargar cursos automáticamente desde Firebase
+        // 5. Manejador para cargar cursos desde Firebase
         cargarCursosBtn.addEventListener("click", function () {
+            // Obtener selección de ciclos
             const ciclo3 = document.getElementById("ciclo3").checked;
             const ciclo5 = document.getElementById("ciclo5").checked;
 
+            // Validar selección de al menos un ciclo
             if (!ciclo3 && !ciclo5) {
                 alert("Por favor, selecciona al menos un ciclo.");
                 return;
@@ -32,134 +38,91 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+// 6. Función para agregar cursos manualmente desde el formulario
 function agregarCursoManual() {
+    // Obtener y formatear datos del formulario
     let nombre = document.getElementById("nombreCurso").value.trim();
     let seccion = document.getElementById("seccion").value.trim();
     let dias = document.getElementById("dias").value.split(",").map(d => d.trim().toUpperCase());
     let horas = document.getElementById("horas").value.split(",").map(h => h.split("-").map(Number));
 
+    // Agregar curso al array y actualizar la lista visual
     cursos.push({ nombre, seccion, dias, horas });
-
-    let lista = document.getElementById("listaCursos");
-    let nuevoCurso = document.createElement("li");
-
-    // Agregar una casilla de verificación
-    let checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = true; // Por defecto, el curso está marcado
-    checkbox.addEventListener("change", function () {
-        // Actualizar el estado del curso (marcado o no)
-        cursos.find(c => c.nombre === nombre && c.seccion === seccion).marcado = checkbox.checked;
-    });
-
-    nuevoCurso.appendChild(checkbox);
-    nuevoCurso.appendChild(document.createTextNode(` ${nombre} - Sección ${seccion} - Días: ${dias.join(", ")} - Horas: ${horas.map(h => h.join("-")).join(", ")}`));
-    lista.appendChild(nuevoCurso);
-
+    actualizarListaCursos(nombre, seccion, dias, horas);
     document.getElementById("cursoForm").reset();
 }
 
+// 7. Función para cargar cursos desde Firebase
 function cargarCursosDesdeFirebase(ciclo3, ciclo5) {
-    // Limpiar la lista de cursos actual
+    // Reiniciar lista de cursos
     cursos = [];
     document.getElementById("listaCursos").innerHTML = "";
 
-    // Cargar cursos de tercer ciclo si está seleccionado
-    if (ciclo3) {
-        fetch("https://unihorario-e8c19-default-rtdb.firebaseio.com/tercerCiclo.json")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data) {
-                    data.forEach(curso => {
-                        curso.marcado = true; // Por defecto, el curso está marcado
-                        cursos.push(curso);
-                        agregarCursoALista(curso);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error al cargar cursos de tercer ciclo:", error);
-            });
-    }
-
-    // Cargar cursos de quinto ciclo si está seleccionado
-    if (ciclo5) {
-        fetch("https://unihorario-e8c19-default-rtdb.firebaseio.com/quintoCiclo.json")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data) {
-                    data.forEach(curso => {
-                        curso.marcado = true; // Por defecto, el curso está marcado
-                        cursos.push(curso);
-                        agregarCursoALista(curso);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error al cargar cursos de quinto ciclo:", error);
-            });
-    }
-
+    // Cargar cursos según ciclos seleccionados
+    if (ciclo3) cargarCiclo("tercerCiclo");
+    if (ciclo5) cargarCiclo("quintoCiclo");
+    
     alert("Cursos cargados automáticamente desde Firebase.");
 }
 
+// 8. Función auxiliar para cargar ciclos específicos
+function cargarCiclo(ciclo) {
+    fetch(`https://unihorario-e8c19-default-rtdb.firebaseio.com/${ciclo}.json`)
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                data.forEach(curso => {
+                    curso.marcado = true; // Marcar curso por defecto
+                    cursos.push(curso);
+                    agregarCursoALista(curso);
+                });
+            }
+        })
+        .catch(error => console.error(`Error en ${ciclo}:`, error));
+}
+
+// 9. Función para actualizar la lista visual de cursos
 function agregarCursoALista(curso) {
     let lista = document.getElementById("listaCursos");
     let nuevoCurso = document.createElement("li");
 
-    // Agregar una casilla de verificación
+    // Crear checkbox interactivo
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.checked = curso.marcado; // Usar el estado del curso
-    checkbox.addEventListener("change", function () {
-        // Actualizar el estado del curso (marcado o no)
-        curso.marcado = checkbox.checked;
-    });
+    checkbox.checked = curso.marcado;
+    checkbox.addEventListener("change", () => curso.marcado = checkbox.checked);
 
+    // Construir elemento de lista
     nuevoCurso.appendChild(checkbox);
-    nuevoCurso.appendChild(document.createTextNode(` ${curso.nombre} - Sección ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`));
+    nuevoCurso.appendChild(document.createTextNode(
+        ` ${curso.nombre} - Sección ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`
+    ));
     lista.appendChild(nuevoCurso);
 }
 
+// 10. Función para enviar datos al servidor y mostrar resultados
 function enviarDatos() {
-    // Filtrar solo los cursos marcados
+    // Filtrar solo cursos marcados
     const cursosMarcados = cursos.filter(curso => curso.marcado);
 
+    // Enviar datos al endpoint de procesamiento
     fetch("https://unihorario.onrender.com/procesar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cursos: cursosMarcados })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
+        // Mostrar resultados de combinaciones
         let resultadoDiv = document.getElementById("resultado");
         resultadoDiv.innerHTML = "";
-
+        
         data.forEach((combinacion, index) => {
-            let combinacionTexto = document.createElement("div");
-            combinacionTexto.innerHTML = `<strong>Combinación ${index + 1}:</strong><br>`;
-
-            combinacion.forEach(curso => {
-                combinacionTexto.innerHTML += `${curso.curso} - ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}<br>`;
-            });
-
-            combinacionTexto.innerHTML += "<br>";
-            resultadoDiv.appendChild(combinacionTexto);
+            resultadoDiv.innerHTML += `
+                <strong>Combinación ${index + 1}:</strong><br>
+                ${combinacion.map(curso => 
+                    `${curso.curso} - ${curso.seccion} - Días: ${curso.dias.join(", ")} - Horas: ${curso.horas.map(h => h.join("-")).join(", ")}`
+                ).join("<br>")}<br><br>`;
         });
     })
     .catch(error => console.error("Error:", error));
